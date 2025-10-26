@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 
+import java.util.List;
+
 @Entity
 @Table(name = "OrderStatus")
 @Getter
@@ -23,5 +25,8 @@ public class OrderStatus {
 
     @Column(name = "Description")
     private String description;
+
+    @OneToMany(mappedBy = "orderStatus")
+    private List<Order> orders;
 
 }

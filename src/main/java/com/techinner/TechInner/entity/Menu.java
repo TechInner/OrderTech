@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "Menu")
 @Getter
@@ -27,6 +29,9 @@ public class Menu {
 
     @Column(name = "Description")
     private String description;
+
+    @OneToMany(mappedBy = "menu")
+    private List<OrderItem> orderItems;
 
 
 

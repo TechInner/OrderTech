@@ -19,11 +19,15 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private Order pedido;
+    @ManyToOne
+    @JoinColumn(name = "idOrder")
+    private Order order;
 
-    //private Cardapio cardapio
+    @ManyToOne
+    @JoinColumn(name = "idMenu")
+    private Menu menu;
 
-    @Column(name = "quantidade")
+    @Column(name = "quantity")
     private int quantity;
 
     @Column(name = "Preco")
