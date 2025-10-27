@@ -5,12 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 import java.util.List;
 
 @Entity
-@jakarta.persistence.Table(name = "Table")
+@jakarta.persistence.Table(name = "tb_Table")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

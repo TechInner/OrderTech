@@ -10,7 +10,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "Menu")
+@Table(name = "tb_Menu")
 @Getter
 @Setter
 @AllArgsConstructor

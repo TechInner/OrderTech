@@ -5,13 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@jakarta.persistence.Table(name = "Order")
+@jakarta.persistence.Table(name = "tb_Order")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -30,7 +29,7 @@ public class Order {
     private LocalDate dtOrder = LocalDate.now();
 
     @ManyToOne
-    @JoinColumn(name = "idMesa")
+    @JoinColumn(name = "idTable")
     private Table table;
 
     @OneToMany(mappedBy = "order")

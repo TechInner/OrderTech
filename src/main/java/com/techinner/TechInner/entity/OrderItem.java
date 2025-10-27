@@ -6,10 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 @Entity
-@Table(name = "OrderItem")
+@Table(name = "tb_OrderItem")
 @Getter
 @Setter
 @AllArgsConstructor
