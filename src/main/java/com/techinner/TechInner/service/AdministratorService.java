@@ -2,6 +2,7 @@ package com.techinner.TechInner.service;
 
 import com.techinner.TechInner.entity.Administrator;
 import com.techinner.TechInner.entity.Table;
+import com.techinner.TechInner.exceptions.administrator.AdministratorNotFound;
 import com.techinner.TechInner.repository.AdministratorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,35 +20,11 @@ public class AdministratorService {
     @Autowired
     private AdministratorRepository repository;
 
-    private final TableService tableService;
-
-    public AdministratorService(TableService tableService) {
-        this.tableService = tableService;
+    public Administrator findById(int id){
+      return repository.findById(id).orElseThrow(
+                () -> new AdministratorNotFound("Administrator not Found")
+        );
     }
-
-    public Table saveTable(Table table){
-        return tableService.saveTable(table);
-    }
-
-    public List<Table> getAllTable(){
-        return tableService.getAllTable();
-    }
-
-    public Table getSingleTable(int id){
-        return tableService.getSingleTable(id);
-    }
-
-    public String deleteTable(int id){
-        return tableService.deleteTable(id);
-    }
-
-    public Table resetPassword(String username, String newPassword){
-        return tableService.resetPassword(username, newPassword);
-    }
-
-//    =======================================
-//    MÉTODOS PARA GERENCIAR ADMINISTRADORES
-//    =======================================
 
     public Administrator registerAdministrator(Administrator administrator){
         if (repository.existsBycpf(administrator.getCpf())){
