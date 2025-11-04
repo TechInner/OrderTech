@@ -17,17 +17,36 @@ public class AdministratorController {
     @Autowired
     private AdministratorService service;
 
-    @PostMapping("/register")
-    public ResponseEntity<Administrator> registerAdministrator
-            (@RequestBody Administrator administrator){
-        return ResponseEntity.ok().body(service.registerAdministrator(administrator));
-    }
-
     @GetMapping("/{id}")
-    private ResponseEntity<Administrator> findByIdAdministrador(@PathVariable int id){
+    private ResponseEntity<Administrator> findById(@PathVariable String id){
 
         return ResponseEntity.ok().body(service.findById(id));
     }
+
+    @GetMapping("/find-all")
+    private ResponseEntity<List<Administrator>> findAll(){
+        return ResponseEntity.ok().body(service.findAll());
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Administrator> registerAdministrator
+            (@RequestBody Administrator administrator){
+        return ResponseEntity.ok().body(service.register(administrator));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> delete(@PathVariable String id){
+        service.delete(id);
+
+        return ResponseEntity.noContent().build();
+
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Administrator> update(@PathVariable String id, @RequestBody Administrator adm){
+        return ResponseEntity.ok(service.update(id, adm));
+    }
+
 
 
 
