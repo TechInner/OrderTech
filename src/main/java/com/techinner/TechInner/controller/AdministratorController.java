@@ -17,7 +17,7 @@ public class AdministratorController {
     @Autowired
     private AdministratorService service;
 
-    @GetMapping("/{id}")
+    @GetMapping("/find-id/{id}")
     private ResponseEntity<Administrator> findById(@PathVariable String id){
 
         return ResponseEntity.ok().body(service.findById(id));

@@ -30,7 +30,7 @@ public class AdministratorService {
 
         try {
             if (id == null || id.trim().isEmpty()) {
-                throw new BadRequestException("Insert the informations");
+                throw new BadRequestException("Id parameter is missing or empty");
             }
 
           Integer idParse = Integer.parseInt(id);
@@ -91,10 +91,6 @@ public class AdministratorService {
        catch (NumberFormatException e){
            throw new BadRequestException("ID must be a number.");
        }
-       catch (Exception e) {
-           // Captura erros inesperados (ex: falha no banco)
-           throw new InternalServerErrorException("An unexpected error occurred while deleting administrator.");
-       }
 
     }
 
@@ -119,16 +115,15 @@ public class AdministratorService {
                 throw new BadRequestException("ID must be a number");
             }
 
-            // Capturo o CPF do request
-            String newDataCpf = request.getCpf();
-            // Verifico se o CPF não é nulo, comparo o Cpf do banco com o do request, se for igual ao do banco sai da condição, se não for entra
-            boolean cpfChanged = newDataCpf != null && !admExist.getCpf().equals(newDataCpf);
-            // Verifico se existe o Cpf
-            boolean existsCpf = repository.existsBycpf(newDataCpf);
 
-            if (cpfChanged && existsCpf){
+            // Verifico se o CPF não é nulo, comparo o Cpf do banco com o do request, se for igual ao do banco sai da condição, se não for entra
+            boolean cpfChanged = request.getCpf() != null &&
+                    !admExist.getCpf().equals(request.getCpf());
+
+            if (cpfChanged && repository.existsBycpf(request.getCpf())){
                 throw new ConflictException("CPF already registred by another administrator");
             }
+
 
             Administrator administratorAtualizado = Administrator.builder()
                     .id(admExist.getId())
