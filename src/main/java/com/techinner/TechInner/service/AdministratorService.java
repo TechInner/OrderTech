@@ -9,6 +9,7 @@ import com.techinner.TechInner.repository.AdministratorRepository;
 import lombok.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ public class AdministratorService {
 
     @Autowired
     private AdministratorRepository repository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public Administrator findById(String id){
 
@@ -69,6 +73,9 @@ public class AdministratorService {
         if (repository.existsBycpf(administrator.getCpf())){
             throw new ConflictException("Administrator already registered.");
         }
+
+        String hashed = passwordEncoder.encode(administrator.getPassword());
+        administrator.setPassword(hashed);
 
         return repository.save(administrator);
     }
