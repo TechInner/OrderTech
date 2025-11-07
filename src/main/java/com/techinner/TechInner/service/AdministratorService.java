@@ -1,6 +1,8 @@
 package com.techinner.TechInner.service;
 
+import com.techinner.TechInner.Methods.Methods;
 import com.techinner.TechInner.entity.Administrator;
+import com.techinner.TechInner.entity.Table;
 import com.techinner.TechInner.exceptions.BadRequestException;
 import com.techinner.TechInner.exceptions.ConflictException;
 import com.techinner.TechInner.exceptions.InternalServerErrorException;
@@ -16,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static com.techinner.TechInner.Methods.Methods.ConvertToInt;
 
 @Service
 public class AdministratorService {
@@ -33,13 +37,9 @@ public class AdministratorService {
     public Administrator findById(String id){
 
         try {
-            if (id == null || id.trim().isEmpty()) {
-                throw new BadRequestException("Id parameter is missing or empty");
-            }
+            Methods.Isnumber(id);
 
-          Integer idParse = Integer.parseInt(id);
-
-          return repository.findById(idParse).orElseThrow(
+          return repository.findById(ConvertToInt(id)).orElseThrow(
                     () -> new NotFoundException("Administrator not Found")
             );
         }catch (NumberFormatException e){
@@ -82,39 +82,23 @@ public class AdministratorService {
 
     public void delete(String id){
 
-       if (id == null || id.trim().isEmpty()){
-           throw new BadRequestException("Id parameter is missing or empty");
-       }
-       try{
-           Integer idParse = Integer.parseInt(id);
+       Methods.Isnumber(id);
 
-           Administrator adm = repository.findById(idParse).orElseThrow(()
+           Administrator adm = repository.findById(ConvertToInt(id)).orElseThrow(()
                    -> new NotFoundException("Not administrator found")
            );
 
            repository.delete(adm);
 
-       }
-       catch (NumberFormatException e){
-           throw new BadRequestException("ID must be a number.");
-       }
-
     }
 
     public Administrator update(String id, Administrator request){
 
-        if(id == null || id.trim().isEmpty()){
-            throw new BadRequestException("Id parameter is missing or empty");
-        }
+       Methods.Isnumber(id);
         Administrator admExist;
         try {
-            Integer intparse = Integer.parseInt(id);
 
-            if (intparse <0) {
-                throw new BadRequestException("ID must be greater than zero");
-            }
-
-            admExist = repository.findById(intparse).orElseThrow(
+            admExist = repository.findById(ConvertToInt(id)).orElseThrow(
                     () -> new NotFoundException("Not administrator found")
             );
         }
@@ -136,13 +120,12 @@ public class AdministratorService {
                     .id(admExist.getId())
                     .name(request.getName() != null ? request.getName() : admExist.getName())
                     .cpf(request.getCpf() != null ? request.getCpf() : admExist.getCpf())
-                    .password(request.getPassword() != null ? request.getPassword() : admExist.getPassword())
+                    .password(admExist.getPassword())
                     .build();
 
           return repository.save(administratorAtualizado);
 
         }
-
 
 
     }

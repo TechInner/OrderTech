@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface TableRepository extends JpaRepository<Table, Integer> {
 //    Método padrão que recebe o username de Table (EX: Mesa 1). Sendo usado para atualizar password de Table
     Optional<Table> findByUsername(String username);
+    boolean existsByUsernameIgnoreCase(String name);
+    boolean existsByUsername(String name);
 }
