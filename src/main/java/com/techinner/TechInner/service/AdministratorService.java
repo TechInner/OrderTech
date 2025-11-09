@@ -24,9 +24,6 @@ import static com.techinner.TechInner.Methods.Methods.ConvertToInt;
 @Service
 public class AdministratorService {
 
-//    ===============================
-//    MÉTODOS PARA GERENCIAR MESAS
-//    ===============================
 
     @Autowired
     private AdministratorRepository repository;
@@ -36,16 +33,11 @@ public class AdministratorService {
 
     public Administrator findById(String id){
 
-        try {
             Methods.Isnumber(id);
 
-          return repository.findById(ConvertToInt(id)).orElseThrow(
-                    () -> new NotFoundException("Administrator not Found")
+          return repository.findById(ConvertToInt(id))
+                  .orElseThrow(() -> new NotFoundException("Administrator not Found")
             );
-        }catch (NumberFormatException e){
-            throw new BadRequestException("ID must be a number");
-        }
-
     }
 
     public List<Administrator> findAll(){
@@ -56,7 +48,6 @@ public class AdministratorService {
             throw new NotFoundException("No administrators found");
         }
         return administratorList;
-
     }
 
     public Administrator register(Administrator administrator){
@@ -96,15 +87,10 @@ public class AdministratorService {
 
        Methods.Isnumber(id);
         Administrator admExist;
-        try {
 
             admExist = repository.findById(ConvertToInt(id)).orElseThrow(
                     () -> new NotFoundException("Not administrator found")
             );
-        }
-           catch (NumberFormatException e){
-                throw new BadRequestException("ID must be a number");
-            }
 
 
             // Verifico se o CPF não é nulo, comparo o Cpf do banco com o do request, se for igual ao do banco sai da condição, se não for entra
