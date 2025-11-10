@@ -1,12 +1,15 @@
 package com.techinner.TechInner.service;
 
 import com.techinner.TechInner.Methods.Methods;
+import com.techinner.TechInner.dto.administrator.AdministratorRequestDTO;
+import com.techinner.TechInner.dto.administrator.AdministratorResponseDTO;
 import com.techinner.TechInner.entity.Administrator;
 import com.techinner.TechInner.entity.Table;
 import com.techinner.TechInner.exceptions.BadRequestException;
 import com.techinner.TechInner.exceptions.ConflictException;
 import com.techinner.TechInner.exceptions.InternalServerErrorException;
 import com.techinner.TechInner.exceptions.NotFoundException;
+import com.techinner.TechInner.mapper.AdministratorMapper;
 import com.techinner.TechInner.repository.AdministratorRepository;
 import lombok.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.techinner.TechInner.Methods.Methods.ConvertToInt;
@@ -31,44 +35,45 @@ public class AdministratorService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Administrator findById(String id){
-
+    public AdministratorResponseDTO findById(String id){
             Methods.Isnumber(id);
 
-          return repository.findById(ConvertToInt(id))
-                  .orElseThrow(() -> new NotFoundException("Administrator not Found")
-            );
+          Administrator admin = repository.findById(ConvertToInt(id))
+                  .orElseThrow(() -> new NotFoundException("Administrator not Found"));
+
+          return AdministratorMapper.toResponse(admin);
     }
 
-    public List<Administrator> findAll(){
-
+    public List<AdministratorResponseDTO> findAll(){
         List<Administrator> administratorList = repository.findAll();
 
         if (administratorList.isEmpty()) {
             throw new NotFoundException("No administrators found");
         }
-        return administratorList;
+        return administratorList.stream()
+                .map(AdministratorMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
-    public Administrator register(Administrator administrator){
+    public AdministratorResponseDTO register(AdministratorRequestDTO dto){
 
         // Valida se as informações está nula ou vazia
         if (Stream.of(
-                administrator.getCpf(),
-                administrator.getName(),
-                administrator.getPassword()
+                dto.getCpf(),
+                dto.getName(),
+                dto.getPassword()
         ).anyMatch(v -> v == null || v.trim().isEmpty())){
             throw new BadRequestException("Insert the informations");
         }
 
-        if (repository.existsBycpf(administrator.getCpf())){
+        if (repository.existsBycpf(dto.getCpf())){
             throw new ConflictException("Administrator already registered.");
         }
 
-        String hashed = passwordEncoder.encode(administrator.getPassword());
-        administrator.setPassword(hashed);
+        Administrator admin = AdministratorMapper.toEntity(dto);
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
 
-        return repository.save(administrator);
+        return AdministratorMapper.toResponse(repository.save(admin));
     }
 
     public void delete(String id){
@@ -83,33 +88,27 @@ public class AdministratorService {
 
     }
 
-    public Administrator update(String id, Administrator request){
+    public AdministratorResponseDTO update(String id, AdministratorRequestDTO dto){
 
        Methods.Isnumber(id);
-        Administrator admExist;
 
-            admExist = repository.findById(ConvertToInt(id)).orElseThrow(
+           Administrator admExist = repository.findById(ConvertToInt(id)).orElseThrow(
                     () -> new NotFoundException("Not administrator found")
             );
 
 
             // Verifico se o CPF não é nulo, comparo o Cpf do banco com o do request, se for igual ao do banco sai da condição, se não for entra
-            boolean cpfChanged = request.getCpf() != null &&
-                    !admExist.getCpf().equals(request.getCpf());
+            boolean cpfChanged = dto.getCpf() != null &&
+                    !admExist.getCpf().equals(dto.getCpf());
 
-            if (cpfChanged && repository.existsBycpf(request.getCpf())){
+            if (cpfChanged && repository.existsBycpf(dto.getCpf())){
                 throw new ConflictException("CPF already registred by another administrator");
             }
 
 
-            Administrator administratorAtualizado = Administrator.builder()
-                    .id(admExist.getId())
-                    .name(request.getName() != null ? request.getName() : admExist.getName())
-                    .cpf(request.getCpf() != null ? request.getCpf() : admExist.getCpf())
-                    .password(admExist.getPassword())
-                    .build();
+            AdministratorMapper.updateEntityFromRequest(dto, admExist);
 
-          return repository.save(administratorAtualizado);
+            return AdministratorMapper.toResponse(repository.save(admExist));
 
         }
 

@@ -1,5 +1,6 @@
 package com.techinner.TechInner.service;
 
+import com.techinner.TechInner.Methods.Methods;
 import com.techinner.TechInner.entity.Order;
 import com.techinner.TechInner.entity.OrderItem;
 import com.techinner.TechInner.exceptions.BadRequestException;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import static com.techinner.TechInner.Methods.Methods.ConvertToInt;
 
 @Service
 public class OrderService {
@@ -47,36 +50,45 @@ public class OrderService {
 
     public Order register(Order order) {
 
+        //Verifica se o corpo da requisição não veio nulo
         if (order == null) {
             throw new BadRequestException("Order body is missing");
         }
 
+        //Verifica se há uma mesa associada ao pedido
         if (order.getTable() == null || order.getTable().getUsername().trim().isEmpty()) {
             throw new BadRequestException("Table reference is required");
         }
 
+        //Caso não haja data registrada, considera a data atual
         if (order.getDtOrder() == null) {
             order.setDtOrder(LocalDate.now());
         }
 
+        //Percorre cada item do pedido
         for (OrderItem item : order.getOrderItems()) {
 
+            //Verifica existência do item
             if (item == null) {
                 throw new BadRequestException("Order item cannot be null");
             }
 
+            //Verifica se o item está associado a um prato
             if (item.getMenu() == null) {
                 throw new BadRequestException("Each item must reference a valid Menu (food)");
             }
 
+            //Verifica se o nome do prato não está como nulo ou vazio
             if (item.getMenu().getName() == null || item.getMenu().getName().trim().isEmpty()) {
                 throw new BadRequestException("Menu item name cannot be empty");
             }
 
+            //Não permite que a quantidade seja <= 0
             if (item.getQuantity() <= 0) {
                 throw new BadRequestException("Item quantity must be greater than 0");
             }
 
+            //Não permite que o preço seja nulo ou <= 0
             if (item.getPrice() == null || item.getPrice() <= 0) {
                 throw new BadRequestException("Item price must be greater than 0");
             }
@@ -117,27 +129,26 @@ public class OrderService {
 
         public Order updateOrder(String id, Order request) {
 
+            //Valida o id
             if (id == null || id.trim().isEmpty()) {
                 throw new BadRequestException("Id parameter is missing or empty");
             }
 
+            Methods.Isnumber(id);
             Order orderExist;
-            try {
-                Integer idParse = Integer.parseInt(id);
-                orderExist = repository.findById(idParse).orElseThrow(
+
+            orderExist = repository.findById(ConvertToInt(id)).orElseThrow(
                         () -> new NotFoundException("Order not found"));
-            } catch (NumberFormatException e) {
-                throw new BadRequestException("Id must be a number");
-            }
 
-            Order orderAtualizado = new Order();
-            orderAtualizado.setId(orderExist.getId());
-            orderAtualizado.setTable(request.getTable() != null ? request.getTable() : orderExist.getTable());
-            orderAtualizado.setOrderStatus(request.getOrderStatus() != null ? request.getOrderStatus() : orderExist.getOrderStatus());
-            orderAtualizado.setDtOrder(orderExist.getDtOrder());
-            orderAtualizado.setOrderItems(orderExist.getOrderItems());
 
-            return repository.save(orderAtualizado);
+            Order orderChanged = new Order();
+            orderChanged.setId(orderExist.getId());
+            orderChanged.setTable(request.getTable() != null ? request.getTable() : orderExist.getTable());
+            orderChanged.setOrderStatus(request.getOrderStatus() != null ? request.getOrderStatus() : orderExist.getOrderStatus());
+            orderChanged.setDtOrder(orderExist.getDtOrder());
+            orderChanged.setOrderItems(orderExist.getOrderItems());
+
+            return repository.save(orderChanged);
 
         }
 
@@ -147,27 +158,23 @@ public class OrderService {
             throw new BadRequestException("Id parameter is missing or empty");
         }
 
+        Methods.Isnumber(id);
         Order orderExist;
-        try {
-            Integer idParse = Integer.parseInt(id);
-            orderExist = repository.findById(idParse).orElseThrow(
+
+
+            orderExist = repository.findById(ConvertToInt(id)).orElseThrow(
                     () -> new NotFoundException("Order not found")
             );
-        } catch (NumberFormatException e){
-            throw new BadRequestException("Id must be a number");
-        }
 
+        //Verifica se o Status do Pedido está "Em aberto"
         if (!orderExist.getOrderStatus().getDescription().equalsIgnoreCase("Open")){
             throw new BadRequestException("Only orders with status 'Open' can be updated");
-        }
-
-        if (request.getOrderStatus() != null){
-            orderExist.setOrderStatus(request.getOrderStatus());
         }
 
         if (request.getOrderStatus() != null && !request.getOrderItems().isEmpty()){
             for (OrderItem newItem : request.getOrderItems()){
 
+                //Verifica se o item novo já existe no pedido
                 Optional<OrderItem> existingItemOpt = orderExist.getOrderItems()
                         .stream()
                         .filter(i -> i.getId() == newItem.getId())
