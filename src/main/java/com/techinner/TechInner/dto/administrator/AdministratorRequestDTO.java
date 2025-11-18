@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class AdministratorRequestDTO {
 
+    //Representa o que será enviado pelo usuário na requisição
     private String name;
     private String cpf;
     private String password;

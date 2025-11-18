@@ -50,9 +50,10 @@ public class AdministratorService {
         if (administratorList.isEmpty()) {
             throw new NotFoundException("No administrators found");
         }
+        //Percorre a lista de Admins um a um e aplica o método toResponse em cada para converter dados da Entidade em DTO
         return administratorList.stream()
                 .map(AdministratorMapper::toResponse)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); //Junta todos os itens para a lista e retorna a List<AdministratorResponseDTO>
     }
 
     public AdministratorResponseDTO register(AdministratorRequestDTO dto){

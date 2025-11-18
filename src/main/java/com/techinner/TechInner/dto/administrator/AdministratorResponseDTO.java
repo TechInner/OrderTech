@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class AdministratorResponseDTO {
 
+    //Usados para enviar dados de resposta a requisição. Envia apenas o necessário
     private int id;
     private String name;
     private String cpf;

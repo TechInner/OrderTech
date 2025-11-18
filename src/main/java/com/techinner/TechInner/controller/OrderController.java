@@ -1,7 +1,11 @@
 package com.techinner.TechInner.controller;
 
+import com.techinner.TechInner.dto.order.OrderRequestDTO;
+import com.techinner.TechInner.dto.order.OrderResponseDTO;
+import com.techinner.TechInner.dto.orderitem.UpdateOrderItemsDTO;
 import com.techinner.TechInner.entity.Order;
 import com.techinner.TechInner.service.OrderService;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,34 +20,36 @@ public class OrderController {
     private OrderService service;
 
     @GetMapping("/find-id/{id}")
-    public ResponseEntity<Order> findById(@PathVariable String id){
-        return ResponseEntity.ok().body(service.findById(id));
+    public ResponseEntity<OrderResponseDTO> findById(@PathVariable String id){
+        return ResponseEntity.ok(service.findById(id));
     }
 
    @GetMapping("/find-all")
-    public ResponseEntity<List<Order>> findAll(){
-        return ResponseEntity.ok().body(service.findAll());
+    public ResponseEntity<List<OrderResponseDTO>> findAll(){
+        return ResponseEntity.ok(service.findAll());
    }
 
    @PostMapping("/register")
-    public ResponseEntity<Order> register(@RequestBody Order order){
-        return ResponseEntity.ok().body(service.register(order));
+    public ResponseEntity<OrderResponseDTO> register(@RequestBody OrderRequestDTO dto){
+        return ResponseEntity.ok(service.register(dto));
    }
 
    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable String id){
+    public ResponseEntity<Void> delete(@PathVariable String id){
         service.delete(id);
         return ResponseEntity.noContent().build();
    }
 
-   @PutMapping("updateOrder/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable String id, @RequestBody Order order){
-        return ResponseEntity.ok().body(service.updateOrder(id, order));
+   @PatchMapping("/{id}/status/{statusId}")
+    public ResponseEntity<OrderResponseDTO> updateStatusOrder
+           (@PathVariable String id, @PathVariable Integer statusId){
+        return ResponseEntity.ok(service.updateStatusOrder(id, statusId));
    }
 
-   @PutMapping("updateOrderItems/{id}")
-    public ResponseEntity<Order> updateOrderItems(@PathVariable String id, @RequestBody Order order){
-        return ResponseEntity.ok().body(service.updateOrderItems(id, order));
+   @PutMapping("{id}/items")
+    public ResponseEntity<OrderResponseDTO> updateOrderItems
+           (@PathVariable String id, @RequestBody UpdateOrderItemsDTO dto){
+        return ResponseEntity.ok(service.updateOrderItems(id, dto));
    }
 
 }

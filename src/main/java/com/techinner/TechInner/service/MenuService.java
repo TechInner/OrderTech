@@ -1,16 +1,23 @@
 package com.techinner.TechInner.service;
 
+import com.techinner.TechInner.Methods.Methods;
+import com.techinner.TechInner.dto.menu.MenuRequestDTO;
+import com.techinner.TechInner.dto.menu.MenuResponseDTO;
 import com.techinner.TechInner.entity.Menu;
 import com.techinner.TechInner.exceptions.BadRequestException;
 import com.techinner.TechInner.exceptions.ConflictException;
 import com.techinner.TechInner.exceptions.NotFoundException;
+import com.techinner.TechInner.mapper.MenuMapper;
 import com.techinner.TechInner.repository.MenuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.techinner.TechInner.Methods.Methods.ConvertToInt;
 
 @Service
 public class MenuService {
@@ -18,117 +25,88 @@ public class MenuService {
     @Autowired
     private MenuRepository repository;
 
-    public Menu findById(String id){
+    public MenuResponseDTO findById(String id) {
+        Methods.Isnumber(id);
 
-        if (id == null || id.trim().isEmpty()) {
-            throw new BadRequestException("Id parameter is missing or empty");
-        }
+        Menu menu = repository.findById(ConvertToInt(id))
+                .orElseThrow(() -> new NotFoundException("Menu not found"));
 
-        try {
-            Integer parseId = Integer.parseInt(id);
-
-            return repository.findById(parseId).orElseThrow(
-                    () -> new  NotFoundException("Food not found")
-            );
-        }
-        catch (NumberFormatException e){
-            throw new BadRequestException("ID must be a number");
-        }
+        return MenuMapper.toResponse(menu);
 
     }
 
-    public List<Menu> findAll(){
-
+    public List<MenuResponseDTO> findAll() {
         List<Menu> menuList = repository.findAll();
 
-        if (menuList.isEmpty()){
+        if (menuList.isEmpty()) {
             throw new NotFoundException("Food not found");
         }
 
-        return menuList;
+        return menuList.stream()
+                .map(MenuMapper::toResponse)
+                .collect(Collectors.toList());
 
     }
 
-    public Menu register(Menu menu){
+    public MenuResponseDTO register(MenuRequestDTO dto) {
 
         //Só faz a verificação de Tipo String
         if (Stream.of(
-                menu.getDescription(),
-                menu.getName()
-        ).anyMatch(v -> v == null || v.trim().isEmpty())){
+                dto.getDescription(),
+                dto.getName()
+        ).anyMatch(v -> v == null || v.trim().isEmpty())) {
             throw new BadRequestException("Insert the informations");
         }
 
-        if (menu.getPrice() == null || menu.getPrice() <= 1){
+        if (dto.getPrice() == null || dto.getPrice() <= 1) {
             throw new BadRequestException("The price must be greater than or equal to 1");
         }
         // Verifica a existência do nome não fazendo distinção de maiusculas e minusculas
-        if (repository.existsByNameIgnoreCase(menu.getName())){
+        if (repository.existsByNameIgnoreCase(dto.getName())) {
             throw new ConflictException("Food with this name already registered.");
         }
 
-        return repository.save(menu);
+        Menu menu = MenuMapper.toEntity(dto);
+        return MenuMapper.toResponse(repository.save(menu));
 
     }
 
-    public void delete(String id){
+    public void delete(String id) {
 
-        if (id == null || id.isEmpty())
-            throw new BadRequestException("Id parameter is missing or empty");
+        Methods.Isnumber(id);
 
-        try {
-            Integer parseId = Integer.parseInt(id);
+        Menu menu = repository.findById(ConvertToInt(id))
+                .orElseThrow(() -> new NotFoundException("Not menu found"));
 
-            Menu menu = repository.findById(parseId).orElseThrow(
-                    () -> new NotFoundException("Id not found")
-            );
-
-            repository.delete(menu);
-
-        }
-        catch (NumberFormatException e){
-            throw new BadRequestException("ID must be a number");
-        }
+        repository.delete(menu);
 
     }
 
-    public Menu update(String id, Menu request){
+    public MenuResponseDTO update(String id, MenuRequestDTO dto) {
 
-        if (id == null || id.trim().isEmpty()){
-            throw new BadRequestException("Id parameter is missing or empty");
-        }
-        Menu menuExist;
-            try{
-                Integer idParse = Integer.parseInt(id);
+        Methods.Isnumber(id);
 
-               menuExist = repository.findById(idParse).orElseThrow(
-                        () -> new NotFoundException("Id not found")
-                );
-            }
-            catch (NumberFormatException e){
-                throw new BadRequestException("ID must be a number");
-            }
+
+        Menu menuExist = repository.findById(ConvertToInt(id)).orElseThrow(
+                () -> new NotFoundException("Id not found")
+        );
 
         // Verifica se houve mudança no nome e se o nome passado pelo usuário não é nulo
-        boolean nameChanged = request.getName() != null &&
-                !menuExist.getName().equalsIgnoreCase(request.getName());
+        boolean nameChanged = dto.getName() != null &&
+                !menuExist.getName().equalsIgnoreCase(dto.getName());
 
         // Se o nome mudou e existir o nome cadastrado cai no IF
-        if (nameChanged && repository.existsByNameIgnoreCase(request.getName())){
+        if (nameChanged && repository.existsByNameIgnoreCase(dto.getName())) {
             throw new ConflictException("Name already registred by another food");
         }
 
-        Menu menuAtualizado = Menu.builder()
-                .id(menuExist.getId())
-                .name(request.getName() != null ? request.getName() : menuExist.getName())
-                .price(request.getPrice() != null ? request.getPrice() : menuExist.getPrice())
-                .description(request.getDescription() != null ? request.getDescription() : menuExist.getDescription())
-                .build();
+        MenuMapper.updateEntityFromRequest(dto, menuExist);
 
-        return repository.save(menuAtualizado);
+        return MenuMapper.toResponse(repository.save(menuExist));
 
 
     }
-
-
 }
+
+
+
