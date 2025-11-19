@@ -73,8 +73,8 @@ public class OrderService {
         Table table = tableRepository.findById(dto.getIdTable())
                 .orElseThrow(() -> new NotFoundException("Table not found"));
 
-        OrderStatus status = orderStatusRepository.findById(dto.getIdStatus())
-                .orElseThrow(() -> new NotFoundException("Order status not found"));
+        OrderStatus status = new OrderStatus();
+        status.setId(1);
 
         Order order = OrderMapper.toEntity(dto, status, table);
         order.setDtOrder(LocalDate.now());

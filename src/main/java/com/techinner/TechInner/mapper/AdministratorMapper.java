@@ -21,7 +21,6 @@ public class AdministratorMapper {
     public static AdministratorResponseDTO toResponse(Administrator admin){
         if (admin == null) return null;
         return AdministratorResponseDTO.builder()
-                .id(admin.getId())
                 .name(admin.getName())
                 .cpf(admin.getCpf())
                 .build();
