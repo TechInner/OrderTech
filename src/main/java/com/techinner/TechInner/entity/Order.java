@@ -32,7 +32,7 @@ public class Order {
     @JoinColumn(name = "idTable")
     private Table table;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
     public int getId() {

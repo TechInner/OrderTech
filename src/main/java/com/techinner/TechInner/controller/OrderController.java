@@ -2,6 +2,7 @@ package com.techinner.TechInner.controller;
 
 import com.techinner.TechInner.dto.order.OrderRequestDTO;
 import com.techinner.TechInner.dto.order.OrderResponseDTO;
+import com.techinner.TechInner.dto.orderitem.OrderItemRequestDTO;
 import com.techinner.TechInner.dto.orderitem.UpdateOrderItemsDTO;
 import com.techinner.TechInner.entity.Order;
 import com.techinner.TechInner.service.OrderService;
@@ -31,7 +32,15 @@ public class OrderController {
 
    @PostMapping("/register")
     public ResponseEntity<OrderResponseDTO> register(@RequestBody OrderRequestDTO dto){
-        return ResponseEntity.ok(service.register(dto));
+        return ResponseEntity.ok(service.registerOrder(dto));
+   }
+
+   @PostMapping("/{idOrder}/items")
+   public void addItem(
+           @PathVariable String idOrder,
+           @RequestBody OrderItemRequestDTO dto
+   ){
+        service.addOrder(idOrder,dto);
    }
 
    @DeleteMapping("/delete/{id}")

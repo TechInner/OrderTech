@@ -9,10 +9,7 @@ import com.techinner.TechInner.entity.*;
 import com.techinner.TechInner.exceptions.BadRequestException;
 import com.techinner.TechInner.exceptions.NotFoundException;
 import com.techinner.TechInner.mapper.OrderMapper;
-import com.techinner.TechInner.repository.MenuRepository;
-import com.techinner.TechInner.repository.OrderRepository;
-import com.techinner.TechInner.repository.OrderStatusRepository;
-import com.techinner.TechInner.repository.TableRepository;
+import com.techinner.TechInner.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +32,9 @@ public class OrderService {
 
     @Autowired
     private OrderStatusRepository orderStatusRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Autowired
     private MenuRepository menuRepository;
@@ -63,7 +63,8 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public OrderResponseDTO register(OrderRequestDTO dto) {
+    //Cria os a solicitação de pedidos (Order)
+    public OrderResponseDTO registerOrder(OrderRequestDTO dto) {
 
         //Verifica se o corpo da requisição não veio nulo
         if (dto.getIdTable() == null || dto.getIdStatus() == null) {
@@ -79,7 +80,35 @@ public class OrderService {
         Order order = OrderMapper.toEntity(dto, status, table);
         order.setDtOrder(LocalDate.now());
 
-        return OrderMapper.toResponse(repository.save(order));
+       return OrderMapper.toResponse(repository.save(order));
+
+
+    }
+
+
+    //Adiciona items a uma solicitação já criada
+    public void addOrder(String idOrder, OrderItemRequestDTO dto){
+
+        Methods.Isnumber(idOrder);
+
+        Order order = repository.findById(Methods.ConvertToInt(idOrder)).orElseThrow(()
+                -> new NotFoundException("Order not found"));
+
+        Menu menu = menuRepository.findById(dto.getMenuId()).orElseThrow(()
+                -> new NotFoundException("Not food found")
+        );
+
+        OrderItem item = OrderItem.builder()
+                .price(menu.getPrice())
+                .quantity(dto.getQuantity())
+                .price(menu.getPrice())
+                .menu(menu)
+                .order(order)
+                .observation(dto.getObservation())
+                .build();
+
+        order.getOrderItems().add(item);
+        repository.save(order);
     }
 
     public void delete(String id) {
