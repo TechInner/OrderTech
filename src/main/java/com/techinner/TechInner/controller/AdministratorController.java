@@ -1,18 +1,14 @@
 package com.techinner.TechInner.controller;
 
-import com.techinner.TechInner.dto.ResetPasswordRequest;
-import com.techinner.TechInner.dto.administrator.AdministratorRequestDTO;
-import com.techinner.TechInner.dto.administrator.AdministratorResponseDTO;
-import com.techinner.TechInner.entity.Administrator;
-import com.techinner.TechInner.entity.Table;
-import com.techinner.TechInner.mapper.AdministratorMapper;
+import com.techinner.TechInner.dto.request.AdministratorRequestDTO;
+import com.techinner.TechInner.dto.response.AdministratorResponseDTO;
 import com.techinner.TechInner.service.AdministratorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/administrator")

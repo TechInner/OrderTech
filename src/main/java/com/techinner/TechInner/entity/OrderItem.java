@@ -33,6 +33,8 @@ public class OrderItem {
     @Column(name = "Observation")
     private String observation;
 
+
+
     public int getId() {
         return id;
     }
@@ -57,7 +59,7 @@ public class OrderItem {
         this.menu = menu;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 

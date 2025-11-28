@@ -1,6 +1,5 @@
-package com.techinner.TechInner.dto.order;
+package com.techinner.TechInner.dto.response;
 
-import com.techinner.TechInner.dto.orderitem.OrderItemResponsoDTO;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -17,6 +16,6 @@ public class OrderResponseDTO {
     private String status;
     private LocalDate dtOrder;
     private String tableNumber;
-    private List<OrderItemResponsoDTO> items;
+    private List<OrderItemResponseDTO> items;
 
 }

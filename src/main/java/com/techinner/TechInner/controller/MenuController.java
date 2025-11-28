@@ -1,8 +1,7 @@
 package com.techinner.TechInner.controller;
 
-import com.techinner.TechInner.dto.menu.MenuRequestDTO;
-import com.techinner.TechInner.dto.menu.MenuResponseDTO;
-import com.techinner.TechInner.entity.Menu;
+import com.techinner.TechInner.dto.request.MenuRequestDTO;
+import com.techinner.TechInner.dto.response.MenuResponseDTO;
 import com.techinner.TechInner.service.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

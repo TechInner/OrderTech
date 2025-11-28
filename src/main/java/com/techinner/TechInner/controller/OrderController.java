@@ -1,12 +1,11 @@
 package com.techinner.TechInner.controller;
 
-import com.techinner.TechInner.dto.order.OrderRequestDTO;
-import com.techinner.TechInner.dto.order.OrderResponseDTO;
-import com.techinner.TechInner.dto.orderitem.OrderItemRequestDTO;
-import com.techinner.TechInner.dto.orderitem.UpdateOrderItemsDTO;
-import com.techinner.TechInner.entity.Order;
+import com.techinner.TechInner.dto.request.OrderRequestDTO;
+import com.techinner.TechInner.dto.response.OrderItemResponseDTO;
+import com.techinner.TechInner.dto.response.OrderResponseDTO;
+import com.techinner.TechInner.dto.request.OrderItemRequestDTO;
+import com.techinner.TechInner.dto.request.UpdateOrderItemsDTO;
 import com.techinner.TechInner.service.OrderService;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,9 +55,17 @@ public class OrderController {
    }
 
    @PutMapping("{id}/items")
-    public ResponseEntity<OrderResponseDTO> updateOrderItems
-           (@PathVariable String id, @RequestBody UpdateOrderItemsDTO dto){
-        return ResponseEntity.ok(service.updateOrderItems(id, dto));
+    public ResponseEntity<OrderItemResponseDTO> updateOrderItems
+           (@PathVariable String id, @RequestBody OrderItemRequestDTO dto){
+        return ResponseEntity.ok().body(service.updateOrderItems(id, dto));
+   }
+
+   @GetMapping("/{id}/close_order")
+    public ResponseEntity<String> closeOrder(
+            @PathVariable String id,
+            @RequestBody OrderItemRequestDTO dto
+   ){
+        return ResponseEntity.ok().body(service.closeOrder(id,dto));
    }
 
 }

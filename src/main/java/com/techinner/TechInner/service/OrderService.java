@@ -1,23 +1,21 @@
 package com.techinner.TechInner.service;
 
 import com.techinner.TechInner.Methods.Methods;
-import com.techinner.TechInner.dto.order.OrderRequestDTO;
-import com.techinner.TechInner.dto.order.OrderResponseDTO;
-import com.techinner.TechInner.dto.orderitem.OrderItemRequestDTO;
-import com.techinner.TechInner.dto.orderitem.UpdateOrderItemsDTO;
+import com.techinner.TechInner.dto.request.OrderRequestDTO;
+import com.techinner.TechInner.dto.request.UpdateOrderItemsDTO;
+import com.techinner.TechInner.dto.response.OrderItemResponseDTO;
+import com.techinner.TechInner.dto.response.OrderResponseDTO;
+import com.techinner.TechInner.dto.request.OrderItemRequestDTO;
 import com.techinner.TechInner.entity.*;
 import com.techinner.TechInner.exceptions.BadRequestException;
 import com.techinner.TechInner.exceptions.NotFoundException;
-import com.techinner.TechInner.mapper.OrderMapper;
+import  static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseObeject;
+import  static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseListObejects;
 import com.techinner.TechInner.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static com.techinner.TechInner.Methods.Methods.ConvertToInt;
 
@@ -47,7 +45,7 @@ public class OrderService {
                     .orElseThrow(() -> new NotFoundException("Order not found")
             );
 
-            return OrderMapper.toResponse(order);
+            return parseObeject(order, OrderResponseDTO.class);
     }
 
     public List<OrderResponseDTO> findAll() {
@@ -58,9 +56,7 @@ public class OrderService {
             throw new NotFoundException("Orders not found");
         }
 
-        return orderList.stream()
-                .map(OrderMapper::toResponse)
-                .collect(Collectors.toList());
+        return parseListObejects(orderList, OrderResponseDTO.class);
     }
 
     //Cria os a solicitação de pedidos (Order)
@@ -74,24 +70,26 @@ public class OrderService {
         Table table = tableRepository.findById(dto.getIdTable())
                 .orElseThrow(() -> new NotFoundException("Table not found"));
 
-        OrderStatus status = new OrderStatus();
-        status.setId(1);
+        OrderStatus status = orderStatusRepository.findById(1).orElseThrow(
+                () -> new NotFoundException("Status not found")
+        );
 
-        Order order = OrderMapper.toEntity(dto, status, table);
-        order.setDtOrder(LocalDate.now());
+        Order order = new Order();
+        order.setOrderStatus(status);
+        order.setTable(table);
 
-       return OrderMapper.toResponse(repository.save(order));
+       return parseObeject(repository.save(order), OrderResponseDTO.class);
 
 
     }
 
 
     //Adiciona items a uma solicitação já criada
-    public void addOrder(String idOrder, OrderItemRequestDTO dto){
+    public OrderItemResponseDTO addOrder(String idOrder, OrderItemRequestDTO dto){
 
         Methods.Isnumber(idOrder);
 
-        Order order = repository.findById(Methods.ConvertToInt(idOrder)).orElseThrow(()
+        Order order = repository.findById(ConvertToInt(idOrder)).orElseThrow(()
                 -> new NotFoundException("Order not found"));
 
         Menu menu = menuRepository.findById(dto.getMenuId()).orElseThrow(()
@@ -101,7 +99,6 @@ public class OrderService {
         OrderItem item = OrderItem.builder()
                 .price(menu.getPrice())
                 .quantity(dto.getQuantity())
-                .price(menu.getPrice())
                 .menu(menu)
                 .order(order)
                 .observation(dto.getObservation())
@@ -109,6 +106,8 @@ public class OrderService {
 
         order.getOrderItems().add(item);
         repository.save(order);
+
+        return parseObeject(item, OrderItemResponseDTO.class);
     }
 
     public void delete(String id) {
@@ -134,25 +133,33 @@ public class OrderService {
             order.setOrderStatus(status);
 
 
-            return OrderMapper.toResponse(repository.save(order));
+            return parseObeject(repository.save(order), OrderResponseDTO.class);
         }
 
-    public OrderResponseDTO updateOrderItems(String id, UpdateOrderItemsDTO request) {
+    public OrderItemResponseDTO updateOrderItems(String id, OrderItemRequestDTO dto) {
 
         Methods.Isnumber(id);
 
         Order orderExist = repository.findById(ConvertToInt(id))
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
+        OrderStatus orderStatusOpen = orderStatusRepository.findById(1).orElseThrow(
+                () -> new NotFoundException("OrderStatus not found")
+        );
+
+        Menu menuExist = menuRepository.findById(dto.getMenuId()).orElseThrow(
+                () -> new NotFoundException("Food not found")
+        );
+
         // Verifica se está aberto para edição
-        if (!orderExist.getOrderStatus().getDescription().equalsIgnoreCase("Open")) {
+        if (orderExist.getOrderStatus() != orderStatusOpen) {
             throw new BadRequestException("Only 'Open' orders can be updated");
         }
 
-        //Verifica de mandou pelo meno 1 item
-        if (request.getItems() == null || request.getItems().isEmpty()){
-            throw new BadRequestException("At least one item must be provided");
-        }
+//        //Verifica de mandou pelo meno 1 item
+//        if (request.getOrder().getOrderItems() == null || request.getOrder().getOrderItems().isEmpty()){
+//            throw new BadRequestException("At least one item must be provided");
+//        }
 
         //Garante que a lista de itens exista
         if (orderExist.getOrderItems() == null) {
@@ -160,40 +167,66 @@ public class OrderService {
 
         }
 
-        for (OrderItemRequestDTO itemDTO : request.getItems()){
 
-            Menu menu = menuRepository.findById(itemDTO.getMenuId())
-                    .orElseThrow(() -> new NotFoundException("Menu not found"));
 
-            if (itemDTO.getQuantity() == null || itemDTO.getQuantity() <= 0) {
-                throw new BadRequestException("Quantity must be greater than 0");
-            }
+        // 👉 VERIFICA SE O ITEM JÁ EXISTE NO PEDIDO
+        OrderItem existingItem = orderExist.getOrderItems().stream()
+                .filter(i -> Objects.equals(i.getMenu().getId(), dto.getMenuId()))
+                .findFirst()
+                .orElse(null);
 
-            // Verifica se o item já existe no pedido
-            Optional<OrderItem> exist =
-                    orderExist.getOrderItems().stream()
-                            .filter(i -> i.getMenu().getId() == itemDTO.getMenuId())
-                            .findFirst();
+        OrderItem item;
 
-            if (exist.isPresent()) {
-                //Atualiza item existente
-                OrderItem existingItem = exist.get();
-                existingItem.setQuantity(itemDTO.getQuantity());
-                existingItem.setObservation(itemDTO.getObservation());
-                existingItem.setPrice(menu.getPrice());
-            } else {
-                OrderItem newItem = new OrderItem();
-                newItem.setMenu(menu);
-                newItem.setQuantity(itemDTO.getQuantity());
-                newItem.setObservation(itemDTO.getObservation());
-                newItem.setUnitPrice(menu.getPrice());
-                newItem.setOrder(orderExist);
+        if (existingItem != null) {
+            // 👉 ATUALIZA ITEM EXISTENTE
+            Optional.ofNullable(dto.getQuantity()).ifPresent(existingItem::setQuantity);
+            Optional.ofNullable(dto.getObservation()).ifPresent(existingItem::setObservation);
+            existingItem.setPrice(menuExist.getPrice());
 
-                orderExist.getOrderItems().add(newItem);
-            }
+            item = existingItem;
+
+        } else {
+            // 👉 ADICIONA NOVO ITEM
+            item = new OrderItem();
+            item.setMenu(menuExist);
+
+            Optional.ofNullable(dto.getQuantity()).ifPresent(item::setQuantity);
+            Optional.ofNullable(dto.getObservation()).ifPresent(item::setObservation);
+
+            item.setPrice(menuExist.getPrice());
+            item.setOrder(orderExist);
+
+            orderExist.getOrderItems().add(item);
         }
 
-        return OrderMapper.toResponse(repository.save(orderExist));
+        repository.save(orderExist);
+
+        return parseObeject(item, OrderItemResponseDTO.class);
+    }
+
+    public String closeOrder(String id, OrderItemRequestDTO dto){
+
+        Methods.Isnumber(id);
+
+        Order order = repository.findById(ConvertToInt(id)).orElseThrow(
+                () -> new NotFoundException("Order not Found")
+        );
+
+        double total = order.getOrderItems()
+                .stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+
+        OrderStatus newOrderStatus = orderStatusRepository.findById(4).orElseThrow(
+                () -> new NotFoundException("Id not found")
+        );
+
+        order.setOrderStatus(newOrderStatus);
+
+        repository.save(order);
+
+        return "Total: R$" + total;
+
     }
 
     }

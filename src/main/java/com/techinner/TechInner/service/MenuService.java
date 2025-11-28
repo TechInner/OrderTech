@@ -1,13 +1,12 @@
 package com.techinner.TechInner.service;
 
 import com.techinner.TechInner.Methods.Methods;
-import com.techinner.TechInner.dto.menu.MenuRequestDTO;
-import com.techinner.TechInner.dto.menu.MenuResponseDTO;
+import com.techinner.TechInner.dto.request.MenuRequestDTO;
+import com.techinner.TechInner.dto.response.MenuResponseDTO;
 import com.techinner.TechInner.entity.Menu;
 import com.techinner.TechInner.exceptions.BadRequestException;
 import com.techinner.TechInner.exceptions.ConflictException;
 import com.techinner.TechInner.exceptions.NotFoundException;
-import com.techinner.TechInner.mapper.MenuMapper;
 import com.techinner.TechInner.repository.MenuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.techinner.TechInner.Methods.Methods.ConvertToInt;
+import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.*;
 
 @Service
 public class MenuService {
@@ -31,7 +31,7 @@ public class MenuService {
         Menu menu = repository.findById(ConvertToInt(id))
                 .orElseThrow(() -> new NotFoundException("Menu not found"));
 
-        return MenuMapper.toResponse(menu);
+        return parseObeject(menu,MenuResponseDTO.class);
 
     }
 
@@ -42,9 +42,7 @@ public class MenuService {
             throw new NotFoundException("Food not found");
         }
 
-        return menuList.stream()
-                .map(MenuMapper::toResponse)
-                .collect(Collectors.toList());
+        return parseListObejects(menuList, MenuResponseDTO.class);
 
     }
 
@@ -66,8 +64,9 @@ public class MenuService {
             throw new ConflictException("Food with this name already registered.");
         }
 
-        Menu menu = MenuMapper.toEntity(dto);
-        return MenuMapper.toResponse(repository.save(menu));
+        Menu menu = parseObeject(dto, Menu.class);
+
+        return parseObeject(repository.save(menu), MenuResponseDTO.class);
 
     }
 
@@ -86,7 +85,6 @@ public class MenuService {
 
         Methods.Isnumber(id);
 
-
         Menu menuExist = repository.findById(ConvertToInt(id)).orElseThrow(
                 () -> new NotFoundException("Id not found")
         );
@@ -100,9 +98,12 @@ public class MenuService {
             throw new ConflictException("Name already registred by another food");
         }
 
-        MenuMapper.updateEntityFromRequest(dto, menuExist);
+        Optional.ofNullable(dto.getName()).ifPresent(menuExist:: setName);
+        Optional.ofNullable(dto.getPrice()).ifPresent(menuExist:: setPrice);
+        Optional.ofNullable(dto.getDescription()).ifPresent(menuExist::setDescription);
 
-        return MenuMapper.toResponse(repository.save(menuExist));
+
+        return parseObeject(repository.save(menuExist), MenuResponseDTO.class);
 
 
     }

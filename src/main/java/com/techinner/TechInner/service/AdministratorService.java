@@ -1,23 +1,20 @@
 package com.techinner.TechInner.service;
 
+import com.github.dozermapper.core.Mapper;
 import com.techinner.TechInner.Methods.Methods;
-import com.techinner.TechInner.dto.administrator.AdministratorRequestDTO;
-import com.techinner.TechInner.dto.administrator.AdministratorResponseDTO;
+import com.techinner.TechInner.dto.request.AdministratorRequestDTO;
+import com.techinner.TechInner.dto.response.AdministratorResponseDTO;
 import com.techinner.TechInner.entity.Administrator;
-import com.techinner.TechInner.entity.Table;
 import com.techinner.TechInner.exceptions.BadRequestException;
 import com.techinner.TechInner.exceptions.ConflictException;
-import com.techinner.TechInner.exceptions.InternalServerErrorException;
 import com.techinner.TechInner.exceptions.NotFoundException;
-import com.techinner.TechInner.mapper.AdministratorMapper;
+import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseObeject;
+import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseListObejects;
 import com.techinner.TechInner.repository.AdministratorRepository;
-import lombok.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,7 +38,7 @@ public class AdministratorService {
           Administrator admin = repository.findById(ConvertToInt(id))
                   .orElseThrow(() -> new NotFoundException("Administrator not Found"));
 
-          return AdministratorMapper.toResponse(admin);
+          return parseObeject(admin, AdministratorResponseDTO.class);
     }
 
     public List<AdministratorResponseDTO> findAll(){
@@ -51,9 +48,7 @@ public class AdministratorService {
             throw new NotFoundException("No administrators found");
         }
         //Percorre a lista de Admins um a um e aplica o método toResponse em cada para converter dados da Entidade em DTO
-        return administratorList.stream()
-                .map(AdministratorMapper::toResponse)
-                .collect(Collectors.toList()); //Junta todos os itens para a lista e retorna a List<AdministratorResponseDTO>
+        return parseListObejects(administratorList, AdministratorResponseDTO.class);
     }
 
     public AdministratorResponseDTO register(AdministratorRequestDTO dto){
@@ -71,10 +66,15 @@ public class AdministratorService {
             throw new ConflictException("Administrator already registered.");
         }
 
-        Administrator admin = AdministratorMapper.toEntity(dto);
-        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+        Administrator entity = parseObeject(dto, Administrator.class);
 
-        return AdministratorMapper.toResponse(repository.save(admin));
+        String hashed = passwordEncoder.encode(dto.getPassword());
+
+        entity.setPassword(hashed);
+
+        repository.save(entity);
+
+        return parseObeject(entity, AdministratorResponseDTO.class);
     }
 
     public void delete(String id){
@@ -106,10 +106,13 @@ public class AdministratorService {
                 throw new ConflictException("CPF already registred by another administrator");
             }
 
+            Optional.ofNullable(dto.getName()).ifPresent(admExist::setName);
+            Optional.ofNullable(dto.getCpf()).ifPresent(admExist::setCpf);
 
-            AdministratorMapper.updateEntityFromRequest(dto, admExist);
 
-            return AdministratorMapper.toResponse(repository.save(admExist));
+            admExist = parseObeject(dto,Administrator.class);
+
+            return parseObeject(admExist,AdministratorResponseDTO.class);
 
         }
 
