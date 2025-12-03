@@ -8,10 +8,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "tb_OrderStatus")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class OrderStatus {
 
@@ -39,6 +35,15 @@ public class OrderStatus {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public OrderStatus() {
+    }
+
+    public OrderStatus(int id, String description, List<Order> orders) {
+        this.id = id;
+        this.description = description;
+        this.orders = orders;
     }
 
     public List<Order> getOrders() {

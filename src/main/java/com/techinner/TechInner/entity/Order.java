@@ -8,10 +8,6 @@ import java.util.List;
 
 @Entity
 @jakarta.persistence.Table(name = "tb_Order")
-@Getter
-@Setter
-@AllArgsConstructor
-@Builder
 @NoArgsConstructor
 
 public class Order {

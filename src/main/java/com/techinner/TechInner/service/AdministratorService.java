@@ -8,8 +8,8 @@ import com.techinner.TechInner.entity.Administrator;
 import com.techinner.TechInner.exceptions.BadRequestException;
 import com.techinner.TechInner.exceptions.ConflictException;
 import com.techinner.TechInner.exceptions.NotFoundException;
-import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseObeject;
-import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseListObejects;
+import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseObject;
+import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseListObjects;
 import com.techinner.TechInner.repository.AdministratorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,7 +38,7 @@ public class AdministratorService {
           Administrator admin = repository.findById(ConvertToInt(id))
                   .orElseThrow(() -> new NotFoundException("Administrator not Found"));
 
-          return parseObeject(admin, AdministratorResponseDTO.class);
+          return parseObject(admin, AdministratorResponseDTO.class);
     }
 
     public List<AdministratorResponseDTO> findAll(){
@@ -48,7 +48,7 @@ public class AdministratorService {
             throw new NotFoundException("No administrators found");
         }
         //Percorre a lista de Admins um a um e aplica o método toResponse em cada para converter dados da Entidade em DTO
-        return parseListObejects(administratorList, AdministratorResponseDTO.class);
+        return parseListObjects(administratorList, AdministratorResponseDTO.class);
     }
 
     public AdministratorResponseDTO register(AdministratorRequestDTO dto){
@@ -66,7 +66,7 @@ public class AdministratorService {
             throw new ConflictException("Administrator already registered.");
         }
 
-        Administrator entity = parseObeject(dto, Administrator.class);
+        Administrator entity = parseObject(dto, Administrator.class);
 
         String hashed = passwordEncoder.encode(dto.getPassword());
 
@@ -74,7 +74,7 @@ public class AdministratorService {
 
         repository.save(entity);
 
-        return parseObeject(entity, AdministratorResponseDTO.class);
+        return parseObject(entity, AdministratorResponseDTO.class);
     }
 
     public void delete(String id){
@@ -110,9 +110,9 @@ public class AdministratorService {
             Optional.ofNullable(dto.getCpf()).ifPresent(admExist::setCpf);
 
 
-            admExist = parseObeject(dto,Administrator.class);
+            admExist = parseObject(dto,Administrator.class);
 
-            return parseObeject(admExist,AdministratorResponseDTO.class);
+            return parseObject(admExist,AdministratorResponseDTO.class);
 
         }
 

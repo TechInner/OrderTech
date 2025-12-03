@@ -9,8 +9,8 @@ import com.techinner.TechInner.dto.request.OrderItemRequestDTO;
 import com.techinner.TechInner.entity.*;
 import com.techinner.TechInner.exceptions.BadRequestException;
 import com.techinner.TechInner.exceptions.NotFoundException;
-import  static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseObeject;
-import  static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseListObejects;
+import  static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseObject;
+import  static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseListObjects;
 import com.techinner.TechInner.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +45,7 @@ public class OrderService {
                     .orElseThrow(() -> new NotFoundException("Order not found")
             );
 
-            return parseObeject(order, OrderResponseDTO.class);
+            return parseObject(order, OrderResponseDTO.class);
     }
 
     public List<OrderResponseDTO> findAll() {
@@ -56,7 +56,7 @@ public class OrderService {
             throw new NotFoundException("Orders not found");
         }
 
-        return parseListObejects(orderList, OrderResponseDTO.class);
+        return parseListObjects(orderList, OrderResponseDTO.class);
     }
 
     //Cria os a solicitação de pedidos (Order)
@@ -78,7 +78,7 @@ public class OrderService {
         order.setOrderStatus(status);
         order.setTable(table);
 
-       return parseObeject(repository.save(order), OrderResponseDTO.class);
+       return parseObject(repository.save(order), OrderResponseDTO.class);
 
 
     }
@@ -107,7 +107,7 @@ public class OrderService {
         order.getOrderItems().add(item);
         repository.save(order);
 
-        return parseObeject(item, OrderItemResponseDTO.class);
+        return parseObject(item, OrderItemResponseDTO.class);
     }
 
     public void delete(String id) {
@@ -133,7 +133,7 @@ public class OrderService {
             order.setOrderStatus(status);
 
 
-            return parseObeject(repository.save(order), OrderResponseDTO.class);
+            return parseObject(repository.save(order), OrderResponseDTO.class);
         }
 
     public OrderItemResponseDTO updateOrderItems(String id, OrderItemRequestDTO dto) {
@@ -201,7 +201,7 @@ public class OrderService {
 
         repository.save(orderExist);
 
-        return parseObeject(item, OrderItemResponseDTO.class);
+        return parseObject(item, OrderItemResponseDTO.class);
     }
 
     public String closeOrder(String id, OrderItemRequestDTO dto){

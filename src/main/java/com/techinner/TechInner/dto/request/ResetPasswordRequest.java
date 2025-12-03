@@ -1,4 +1,4 @@
-package com.techinner.TechInner.dto;
+package com.techinner.TechInner.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +8,8 @@ import lombok.Setter;
 
 //DTO criada para não passar senha da Mesa na URL do navegador e usar RequestBody para acessar o método resetPassword
 public class ResetPasswordRequest {
+
     private String username;
-    private String newPassword;
+    private String password;
 
 }

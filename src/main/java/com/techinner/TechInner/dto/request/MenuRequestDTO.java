@@ -8,6 +8,8 @@ public class MenuRequestDTO {
    private Double price;
    private String description;
 
+
+
     public MenuRequestDTO() {
     }
 

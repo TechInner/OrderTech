@@ -7,10 +7,6 @@ import java.util.List;
 
 @Entity
 @jakarta.persistence.Table(name = "tb_Table")
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
 @Builder
 public class Table {
 
@@ -27,6 +23,15 @@ public class Table {
     @OneToMany(mappedBy = "table")
     private List<Order> orders;
 
+    public Table(int id, String username, String password, List<Order> orders) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.orders = orders;
+    }
+
+    public Table() {
+    }
 
     public int getId() {
         return id;

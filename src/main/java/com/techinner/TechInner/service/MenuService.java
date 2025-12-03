@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.techinner.TechInner.Methods.Methods.ConvertToInt;
-import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.*;
+import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseObject;
+import static com.techinner.TechInner.mapper.mapperNew.ObjectMapper.parseListObjects;
 
 @Service
 public class MenuService {
@@ -31,7 +32,7 @@ public class MenuService {
         Menu menu = repository.findById(ConvertToInt(id))
                 .orElseThrow(() -> new NotFoundException("Menu not found"));
 
-        return parseObeject(menu,MenuResponseDTO.class);
+        return parseObject(menu,MenuResponseDTO.class);
 
     }
 
@@ -42,7 +43,7 @@ public class MenuService {
             throw new NotFoundException("Food not found");
         }
 
-        return parseListObejects(menuList, MenuResponseDTO.class);
+        return parseListObjects(menuList, MenuResponseDTO.class);
 
     }
 
@@ -64,9 +65,9 @@ public class MenuService {
             throw new ConflictException("Food with this name already registered.");
         }
 
-        Menu menu = parseObeject(dto, Menu.class);
+        Menu menu = parseObject(dto, Menu.class);
 
-        return parseObeject(repository.save(menu), MenuResponseDTO.class);
+        return parseObject(repository.save(menu), MenuResponseDTO.class);
 
     }
 
@@ -103,7 +104,7 @@ public class MenuService {
         Optional.ofNullable(dto.getDescription()).ifPresent(menuExist::setDescription);
 
 
-        return parseObeject(repository.save(menuExist), MenuResponseDTO.class);
+        return parseObject(repository.save(menuExist), MenuResponseDTO.class);
 
 
     }

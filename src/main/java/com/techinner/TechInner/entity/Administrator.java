@@ -6,10 +6,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "tb_Administrator")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class Administrator {
 

@@ -8,10 +8,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "tb_Menu")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class Menu {
 

@@ -6,10 +6,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "tb_OrderItem")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class OrderItem {
     @Id
@@ -33,7 +29,17 @@ public class OrderItem {
     @Column(name = "Observation")
     private String observation;
 
+    public OrderItem() {
+    }
 
+    public OrderItem(int id, Order order, Menu menu, int quantity, Double price, String observation) {
+        this.id = id;
+        this.order = order;
+        this.menu = menu;
+        this.quantity = quantity;
+        this.price = price;
+        this.observation = observation;
+    }
 
     public int getId() {
         return id;

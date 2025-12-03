@@ -11,12 +11,12 @@ public class ObjectMapper {
     private static Mapper mapper = DozerBeanMapperBuilder.buildDefault();
 
     // Converte de DTO para Entity e Entity para DTO
-    public static <O, D> D parseObeject(O origin, Class<D> destination){
+    public static <O, D> D parseObject(O origin, Class<D> destination){
         return mapper.map(origin, destination);
     }
 
     //Converte litas
-    public static <O, D> List<D> parseListObejects(List<O> origin, Class<D> destination){
+    public static <O, D> List<D> parseListObjects(List<O> origin, Class<D> destination){
 
         List<D> destinationObjects = new ArrayList<D>();
         for (Object o: origin){
