@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RunProject" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.techinner.TechInner.TechInnerApplication" />
+    <module name="TechInner" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/main/java/com/techinner/TechInner/TechInnerApplication.java" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

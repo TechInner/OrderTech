@@ -1,0 +1,7 @@
+package com.techinner.TechInner.exceptions;
+
+public class InternalServerErrorException extends RuntimeException {
+    public InternalServerErrorException(String message) {
+        super(message);
+    }
+}
